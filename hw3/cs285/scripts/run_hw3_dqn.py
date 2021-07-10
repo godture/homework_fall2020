@@ -1,5 +1,6 @@
 import os
 import time
+import wandb
 
 from cs285.infrastructure.rl_trainer import RL_Trainer
 from cs285.agents.dqn_agent import DQNAgent
@@ -85,6 +86,10 @@ def main():
         os.makedirs(logdir)
 
     print("\n\n\nLOGGING TO: ", logdir, "\n\n\n")
+    #############
+    ## wandb
+    #############
+    wandb.init(project='mlj', name=params['exp_name'], sync_tensorboard=True)
 
     trainer = Q_Trainer(params)
     trainer.run_training_loop()

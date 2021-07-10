@@ -56,6 +56,31 @@ def mean_squared_error(a, b):
 
 def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('rgb_array')):
     # TODO: get this from Piazza
+    obs, image_obs, acs, rewards, next_obs, terminals = [], [], [], [], [], []
+    ob = env.reset()
+    done = False
+    step = 0
+    while not done and step<max_path_length:
+        obs.append[ob]
+        if render:
+            if render_mode =='rgb_array':
+                if hasattr(env, 'sim'):
+                    image_obs.append(env.sim.render(camera_name='track', height=500, width=500)[::-1])
+                else:
+                    image_obs.append(env.render(mode=render_mode))
+            else:
+                env.render(mode=render_mode)
+                time.sleep(env.model.opt.timestep)
+        ac = policy.get_action(np.array(ob)[None])
+        ac = ac[0]
+        acs.append[ac]
+        ob, rew, done, _ = env.step(ac)
+        step += 1
+        rewards.append(rew)
+        next_obs.append(ob)
+        terminals.append(done or step>=max_path_length)
+    
+    return Path(obs, image_obs, acs, rewards, next_obs, terminals)
 
 def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, render=False, render_mode=('rgb_array')):
     """
@@ -63,6 +88,12 @@ def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, r
         until we have collected min_timesteps_per_batch steps
     """
     # TODO: get this from Piazza
+    paths = []
+    timesteps_this_batch = 0
+    while timesteps_this_batch < min_timesteps_per_batch:
+        path = sample_trajectory(env, policy, max_path_length, render, render_mode)
+        timesteps_this_batch += get_pathlength(path)
+        paths.append(path)
 
     return paths, timesteps_this_batch
 
@@ -71,6 +102,10 @@ def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False, ren
         Collect ntraj rollouts using policy
     """
     # TODO: get this from Piazza
+    paths = []
+    for _ in range(ntraj):
+        path = sample_trajectory(env, policy, max_path_length, render, render_mode)
+        paths.append(path)
 
     return paths
 

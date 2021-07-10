@@ -87,6 +87,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         # TODO: get this from Piazza
+        if len(obs.shape)==1:
+            obs = obs[None]
+        observations = torch.tensor(obs, dtype=torch.float, device=ptu.device)
+        action_distribution = self(observations)
+        action = action_distribution.sample().detach().cpu().numpy()
         return action
 
     # update/train this policy
@@ -100,6 +105,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor):
         # TODO: get this from Piazza
+        if self.discrete:
+            action_distribution = distributions.Categorical(logits=self.logits_na(observation))
+        else:
+            means = self.mean_net(observation)
+            action_distribution = distributions.Normal(means, torch.exp(self.logstd))
         return action_distribution
 
 
